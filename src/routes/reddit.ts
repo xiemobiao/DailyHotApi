@@ -1,5 +1,6 @@
 import type { RouterData, ListContext } from "../types.js";
 import { get } from "../utils/getData.js";
+import { parseRSS } from "../utils/parseRSS.js";
 
 // 支持的子版块
 const subredditMap: Record<string, string> = {
@@ -33,34 +34,36 @@ export const handleRoute = async (c: ListContext, noCache: boolean) => {
 };
 
 const getList = async (subreddit: string, noCache: boolean) => {
-  const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=30`;
+  // 使用 RSS feed，对 IP 限制更宽松
+  const url = `https://www.reddit.com/r/${subreddit}/hot.rss`;
 
   const result = await get({
     url,
     noCache,
-    ttl: 1800, // 30分钟缓存
+    ttl: 1800,
     headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "User-Agent": "Mozilla/5.0 (compatible; DailyHot/1.0; +https://github.com/imsyy/DailyHotApi)",
+      "Accept": "application/rss+xml, application/xml, text/xml, */*",
     },
   });
 
   try {
-    const children = result.data?.data?.children || [];
+    const items = await parseRSS(result.data);
 
     return {
       ...result,
-      data: children.slice(0, 30).map((item: any, index: number) => ({
-        id: item.data?.id || index,
-        title: item.data?.title || "",
-        desc: item.data?.selftext?.substring(0, 200) || "",
-        author: item.data?.author || "",
-        hot: item.data?.ups || 0,
-        timestamp: item.data?.created_utc ? item.data.created_utc * 1000 : undefined,
-        url: `https://reddit.com${item.data?.permalink || ""}`,
-        mobileUrl: `https://reddit.com${item.data?.permalink || ""}`,
+      data: items.slice(0, 30).map((item: any, index: number) => ({
+        id: item.guid || item.link || index,
+        title: item.title || "",
+        desc: item.contentSnippet || item.content?.substring(0, 200) || "",
+        author: item.author || item.creator || "",
+        hot: undefined,
+        timestamp: item.pubDate ? new Date(item.pubDate).getTime() : undefined,
+        url: item.link || "",
+        mobileUrl: item.link || "",
       })),
     };
   } catch (error) {
-    throw new Error(`Failed to parse Reddit data: ${error}`);
+    throw new Error(`Failed to parse Reddit RSS: ${error}`);
   }
 };
