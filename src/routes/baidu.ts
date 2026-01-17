@@ -42,22 +42,44 @@ const getList = async (options: Options, noCache: boolean): Promise<RouterResTyp
         "Mozilla/5.0 (iPhone; CPU iPhone OS 14_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/1.0 Mobile/12F69 Safari/605.1.15",
     },
   });
-  // 正则查找
   const pattern = /<!--s-data:(.*?)-->/s;
   const matchResult = result.data.match(pattern);
-  const jsonObject = JSON.parse(matchResult[1]).cards[0].content;
+  if (!matchResult?.[1]) {
+    return { ...result, data: [] };
+  }
+
+  const parsed = JSON.parse(matchResult[1]);
+
+  const richList = parsed?.data?.cards?.[0]?.content;
+  const liteList = parsed?.cards?.[0]?.content?.[0]?.content;
+
+  const list = Array.isArray(richList) ? richList : Array.isArray(liteList) ? liteList : [];
+  if (!list.length) {
+    return { ...result, data: [] };
+  }
+
   return {
     ...result,
-    data: jsonObject.map((v: RouterType["baidu"]) => ({
-      id: v.index,
-      title: v.word,
-      desc: v.desc,
-      cover: v.img,
-      author: v.show?.length ? v.show : "",
-      timestamp: 0,
-      hot: Number(v.hotScore || 0),
-      url: `https://www.baidu.com/s?wd=${encodeURIComponent(v.query)}`,
-      mobileUrl: v.rawUrl,
-    })),
+    data: list.map((v: RouterType["baidu"] | { word?: string; url?: string; index?: number }) => {
+      const title = v.word || "";
+      const query = "query" in v ? v.query : title;
+      const rawUrl = "rawUrl" in v ? v.rawUrl : v.url;
+      const cover = "img" in v ? v.img : undefined;
+      const desc = "desc" in v ? v.desc : undefined;
+      const author = "show" in v && v.show?.length ? v.show : "";
+      const hot = "hotScore" in v ? Number(v.hotScore || 0) : undefined;
+
+      return {
+        id: typeof v.index === "number" ? v.index : Number.NaN,
+        title,
+        desc,
+        cover,
+        author,
+        timestamp: 0,
+        hot,
+        url: query ? `https://www.baidu.com/s?wd=${encodeURIComponent(query)}` : rawUrl || "",
+        mobileUrl: rawUrl || "",
+      };
+    }),
   };
 };

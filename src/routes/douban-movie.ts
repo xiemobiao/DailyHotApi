@@ -29,34 +29,40 @@ const getNumbers = (text: string | undefined): number => {
 
 const getList = async (noCache: boolean) => {
   const url = `https://movie.douban.com/chart/`;
-  const result = await get({
-    url,
-    noCache,
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
-    },
-  });
-  const $ = load(result.data);
-  const listDom = $(".article tr.item");
-  const listData = listDom.toArray().map((item) => {
-    const dom = $(item);
-    const url = dom.find("a").attr("href") || undefined;
-    const scoreDom = dom.find(".rating_nums");
-    const score = scoreDom.length > 0 ? scoreDom.text() : "0.0";
+
+  try {
+    const result = await get({
+      url,
+      noCache,
+      timeout: 30000,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1",
+      },
+    });
+    const $ = load(result.data);
+    const listDom = $(".article tr.item");
+    const listData = listDom.toArray().map((item) => {
+      const dom = $(item);
+      const url = dom.find("a").attr("href") || undefined;
+      const scoreDom = dom.find(".rating_nums");
+      const score = scoreDom.length > 0 ? scoreDom.text() : "0.0";
+      return {
+        id: getNumbers(url),
+        title: `【${score}】${dom.find("a").attr("title")}`,
+        cover: dom.find("img").attr("src"),
+        desc: dom.find("p.pl").text(),
+        timestamp: undefined,
+        hot: getNumbers(dom.find("span.pl").text()),
+        url: url || `https://movie.douban.com/subject/${getNumbers(url)}/`,
+        mobileUrl: `https://m.douban.com/movie/subject/${getNumbers(url)}/`,
+      };
+    });
     return {
-      id: getNumbers(url),
-      title: `【${score}】${dom.find("a").attr("title")}`,
-      cover: dom.find("img").attr("src"),
-      desc: dom.find("p.pl").text(),
-      timestamp: undefined,
-      hot: getNumbers(dom.find("span.pl").text()),
-      url: url || `https://movie.douban.com/subject/${getNumbers(url)}/`,
-      mobileUrl: `https://m.douban.com/movie/subject/${getNumbers(url)}/`,
+      ...result,
+      data: listData,
     };
-  });
-  return {
-    ...result,
-    data: listData,
-  };
+  } catch {
+    return { fromCache: false, updateTime: new Date().toISOString(), data: [] };
+  }
 };

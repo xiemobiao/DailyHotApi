@@ -3,6 +3,7 @@ import { config } from "../config.js";
 import { getCache, setCache, delCache } from "./cache.js";
 import logger from "./logger.js";
 import axios from "axios";
+import type { AxiosRequestConfig } from "axios";
 
 // 基础配置
 const request = axios.create({
@@ -41,6 +42,7 @@ export const get = async (options: Get) => {
     url,
     headers,
     params,
+    timeout,
     noCache,
     ttl = config.CACHE_TTL,
     originaInfo = false,
@@ -62,7 +64,11 @@ export const get = async (options: Get) => {
       }
     }
     // 缓存不存在时请求接口
-    const response = await request.get(url, { headers, params, responseType });
+    const requestConfig: AxiosRequestConfig = { headers, params, responseType };
+    if (timeout) {
+      requestConfig.timeout = timeout;
+    }
+    const response = await request.get(url, requestConfig);
     const responseData = response?.data || response;
     // 存储新获取的数据到缓存
     const updateTime = new Date().toISOString();
@@ -79,7 +85,7 @@ export const get = async (options: Get) => {
 
 // POST
 export const post = async (options: Post) => {
-  const { url, headers, body, noCache, ttl = config.CACHE_TTL, originaInfo = false } = options;
+  const { url, headers, body, timeout, noCache, ttl = config.CACHE_TTL, originaInfo = false } = options;
   logger.info(`🌐 [POST] ${url}`);
   try {
     // 检查缓存
@@ -92,7 +98,11 @@ export const post = async (options: Post) => {
       }
     }
     // 缓存不存在时请求接口
-    const response = await request.post(url, body, { headers });
+    const requestConfig: AxiosRequestConfig = { headers };
+    if (timeout) {
+      requestConfig.timeout = timeout;
+    }
+    const response = await request.post(url, body, requestConfig);
     const responseData = response?.data || response;
     // 存储新获取的数据到缓存
     const updateTime = new Date().toISOString();

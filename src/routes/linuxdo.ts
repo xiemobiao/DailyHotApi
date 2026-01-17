@@ -1,24 +1,44 @@
-import type { RouterData } from "../types.js";
+import type { RouterData, ListContext } from "../types.js";
 import { get } from "../utils/getData.js";
 import { getTime } from "../utils/getTime.js";
 import { parseRSS } from "../utils/parseRSS.js";
 
-export const handleRoute = async (_: undefined, noCache: boolean) => {
-  const listData = await getList(noCache);
+type PeriodType = "daily" | "weekly" | "monthly";
+
+const periodMap: Record<PeriodType, string> = {
+  daily: "日榜",
+  weekly: "周榜",
+  monthly: "月榜",
+};
+
+const defaultPeriod: PeriodType = "weekly";
+
+const normalizePeriod = (period?: string): PeriodType =>
+  period && period in periodMap ? (period as PeriodType) : defaultPeriod;
+
+export const handleRoute = async (c: ListContext, noCache: boolean) => {
+  const period = normalizePeriod(c.req.query("period"));
+  const listData = await getList(period, noCache);
   const routeData: RouterData = {
     name: "linuxdo",
     title: "Linux.do",
-    type: "热门文章",
+    type: periodMap[period],
     description: "Linux 技术社区热搜",
-    link: "https://linux.do/top/weekly",
+    params: {
+      period: {
+        name: "榜单周期",
+        type: periodMap,
+      },
+    },
+    link: `https://linux.do/top/${period}`,
     total: listData.data?.length || 0,
     ...listData,
   };
   return routeData;
 };
 
-const getList = async (noCache: boolean) => {
-  const url = "https://linux.do/top.rss?period=weekly";
+const getList = async (period: PeriodType, noCache: boolean) => {
+  const url = `https://linux.do/top.rss?period=${period}`;
   const result = await get({
     url,
     noCache,

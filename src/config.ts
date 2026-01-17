@@ -17,6 +17,7 @@ export type Config = {
   REDIS_PASSWORD: string;
   REDIS_DB: number;
   ZHIHU_COOKIE: string;
+  WEIBO_COOKIE: string;
   FILTER_WEIBO_ADVERTISEMENT: boolean;
 };
 
@@ -56,5 +57,6 @@ export const config: Config = {
   REDIS_PASSWORD: getEnvVariable("REDIS_PASSWORD") || "",
   REDIS_DB:  getNumericEnvVariable("REDIS_DB", 0),
   ZHIHU_COOKIE: getEnvVariable("ZHIHU_COOKIE") || "",
+  WEIBO_COOKIE: getEnvVariable("WEIBO_COOKIE") || "",
   FILTER_WEIBO_ADVERTISEMENT: getBooleanEnvVariable("FILTER_WEIBO_ADVERTISEMENT", false),
 };
