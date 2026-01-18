@@ -19,6 +19,14 @@ export type Config = {
   ZHIHU_COOKIE: string;
   WEIBO_COOKIE: string;
   FILTER_WEIBO_ADVERTISEMENT: boolean;
+  // AI 相关配置
+  AI_ENABLED: boolean;
+  OPENAI_API_KEY: string;
+  OPENAI_BASE_URL: string;
+  OPENAI_MODEL: string;
+  AI_CACHE_TTL: number;
+  AI_MAX_TOKENS: number;
+  AI_TEMPERATURE: number;
 };
 
 // 验证并提取环境变量
@@ -59,4 +67,12 @@ export const config: Config = {
   ZHIHU_COOKIE: getEnvVariable("ZHIHU_COOKIE") || "",
   WEIBO_COOKIE: getEnvVariable("WEIBO_COOKIE") || "",
   FILTER_WEIBO_ADVERTISEMENT: getBooleanEnvVariable("FILTER_WEIBO_ADVERTISEMENT", false),
+  // AI 相关配置
+  AI_ENABLED: getBooleanEnvVariable("AI_ENABLED", false),
+  OPENAI_API_KEY: getEnvVariable("OPENAI_API_KEY") || "",
+  OPENAI_BASE_URL: getEnvVariable("OPENAI_BASE_URL") || "https://api.openai.com/v1",
+  OPENAI_MODEL: getEnvVariable("OPENAI_MODEL") || "gpt-3.5-turbo",
+  AI_CACHE_TTL: getNumericEnvVariable("AI_CACHE_TTL", 86400),
+  AI_MAX_TOKENS: getNumericEnvVariable("AI_MAX_TOKENS", 500),
+  AI_TEMPERATURE: parseFloat(getEnvVariable("AI_TEMPERATURE") || "0.7"),
 };

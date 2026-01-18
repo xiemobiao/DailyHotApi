@@ -7,6 +7,7 @@ import { prettyJSON } from "hono/pretty-json";
 import { trimTrailingSlash } from "hono/trailing-slash";
 import logger from "./utils/logger.js";
 import registry from "./registry.js";
+import aiRouter from "./routes/ai.js";
 import robotstxt from "./robots.txt.js";
 import NotFound from "./views/NotFound.js";
 import Home from "./views/Home.js";
@@ -47,6 +48,9 @@ app.use(
     rewriteRequestPath: (path) => (path === "/favicon.ico" ? "/favicon.png" : path),
   }),
 );
+
+// AI 路由
+app.route("/ai", aiRouter);
 
 // 主路由
 app.route("/", registry);
