@@ -8,10 +8,15 @@ import { trimTrailingSlash } from "hono/trailing-slash";
 import logger from "./utils/logger.js";
 import registry from "./registry.js";
 import aiRouter from "./routes/ai.js";
+import userRouter from "./routes/user.js";
+import { getDb } from "./db/index.js";
 import robotstxt from "./robots.txt.js";
 import NotFound from "./views/NotFound.js";
 import Home from "./views/Home.js";
 import Error from "./views/Error.js";
+
+// 初始化数据库
+getDb();
 
 const app = new Hono();
 
@@ -34,8 +39,8 @@ app.use(
       const isSame = config.ALLOWED_HOST && origin.endsWith(config.ALLOWED_HOST);
       return isSame ? origin : config.ALLOWED_DOMAIN;
     },
-    allowMethods: ["POST", "GET", "OPTIONS"],
-    allowHeaders: ["X-Custom-Header", "Upgrade-Insecure-Requests"],
+    allowMethods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["X-Custom-Header", "Upgrade-Insecure-Requests", "Authorization", "Content-Type"],
     credentials: true,
   }),
 );
@@ -51,6 +56,9 @@ app.use(
 
 // AI 路由
 app.route("/ai", aiRouter);
+
+// 用户路由
+app.route("/user", userRouter);
 
 // 主路由
 app.route("/", registry);

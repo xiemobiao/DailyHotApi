@@ -27,6 +27,11 @@ export type Config = {
   AI_CACHE_TTL: number;
   AI_MAX_TOKENS: number;
   AI_TEMPERATURE: number;
+  // 数据库配置
+  DB_PATH: string;
+  // JWT 配置
+  JWT_SECRET: string;
+  JWT_EXPIRES_IN: string;
 };
 
 // 验证并提取环境变量
@@ -75,4 +80,9 @@ export const config: Config = {
   AI_CACHE_TTL: getNumericEnvVariable("AI_CACHE_TTL", 86400),
   AI_MAX_TOKENS: getNumericEnvVariable("AI_MAX_TOKENS", 500),
   AI_TEMPERATURE: parseFloat(getEnvVariable("AI_TEMPERATURE") || "0.7"),
+  // 数据库配置
+  DB_PATH: getEnvVariable("DB_PATH") || "./data/dailyhot.db",
+  // JWT 配置
+  JWT_SECRET: getEnvVariable("JWT_SECRET") || "your-super-secret-key-change-in-production",
+  JWT_EXPIRES_IN: getEnvVariable("JWT_EXPIRES_IN") || "7d",
 };
