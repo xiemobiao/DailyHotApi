@@ -208,6 +208,17 @@ sh ./deploy.sh
 
 - [RSSHub](https://github.com/DIYgod/RSSHub)
 
+## 🔀 Fork 说明
+
+本仓库是 [imsyy/DailyHotApi](https://github.com/imsyy/DailyHotApi) 的 Fork 版本，在原项目基础上新增了以下功能：
+
+- 🤖 AI 智能分析 - 热点摘要、情感分析、分类标签
+- 🌐 国际热榜翻译 - 一键翻译为中文
+- 👤 用户系统 - 注册登录、JWT 认证、SQLite 存储
+- 📦 数据库支持 - better-sqlite3 本地存储
+
+感谢原作者 [@imsyy](https://github.com/imsyy) 的开源贡献！
+
 ## ⭐ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=imsyy/DailyHotApi&type=Date)](https://star-history.com/#imsyy/DailyHotApi&Date)

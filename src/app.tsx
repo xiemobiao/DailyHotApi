@@ -9,6 +9,7 @@ import logger from "./utils/logger.js";
 import registry from "./registry.js";
 import aiRouter from "./routes/ai.js";
 import userRouter from "./routes/user.js";
+import translateRouter from "./routes/translate.js";
 import { getDb } from "./db/index.js";
 import robotstxt from "./robots.txt.js";
 import NotFound from "./views/NotFound.js";
@@ -56,6 +57,9 @@ app.use(
 
 // AI 路由
 app.route("/ai", aiRouter);
+
+// 翻译路由
+app.route("/translate", translateRouter);
 
 // 用户路由
 app.route("/user", userRouter);
